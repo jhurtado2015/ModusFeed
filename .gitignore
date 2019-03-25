@@ -3,3 +3,17 @@
 ################################################################################
 
 /BusinessDomain/obj
+/BusinessDomain/bin/Debug/netstandard2.0
+/DataAccess/bin/Debug/netstandard2.0
+/DataAccess/obj/Debug/netstandard2.0
+/DomainObjects/bin/Debug/netstandard2.0
+/DomainObjects/obj
+/ModusFeedReader/bin
+/ModusFeedReader/obj/Debug
+/ModusFeedReader.Tests/bin/Debug
+/ModusFeedReader.Tests/obj/Debug
+/packages
+/ViewModels/bin/Debug/netstandard2.0
+/ViewModels/obj
+/.vs/ModusFeedReader/v15/Server/sqlite3
+/DataAccess/obj

@@ -1,0 +1,77 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+
+/*Navigation Bar Section*/
+
+.navbar-brand-link {
+    float: left;
+    height: 50px;
+    padding: 15px 15px;
+    font-size: 12px;
+    color:white;
+    line-height: 20px;
+}
+
+/*End Navigation Bar Section*/
+
+/*Subscriptions Section*/
+.box {
+    padding: 60px 0px;
+}
+
+.box-part {
+    background: rgba(217, 83, 79, 1);
+    border-radius: 0;
+    padding: 60px 10px;
+    margin: 30px 0px;
+}
+
+.text {
+    margin: 20px 0px;
+}
+
+.fa {
+    color: #4183D7;
+}
+
+/*End Subscription Section*/
+
+/* Feed Home Section */
+
+.feeds-selector{
+    margin-top:15px;
+}
+
+/* End Feed Home Section */
+
+/*Feed Container Section*/
+
+.feed-item-thumbnail{
+    width:100px;
+    height:100px;
+}
+
+/*End Feed Container Section*/
