@@ -30,7 +30,6 @@ namespace ModusFeedReader.Controllers
             return View("~/Views/Home/FeedContainer.cshtml", feed.SyncroniceFeeds());
         }
 
-
         [HttpPost]
         public ActionResult FilterFeeds(FeedContainerInputModel model)
         {

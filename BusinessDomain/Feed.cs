@@ -34,6 +34,7 @@ namespace BusinessDomain
             SubscriptionsVM model = new SubscriptionsVM();
 
             model.Feeds = ConvertToSubscription();
+            
             return model;
         }
 
@@ -43,13 +44,16 @@ namespace BusinessDomain
             subscriptionRepository = new SubscriptionRepository(new FeedContext());
 
             var feeds = feedRepository.All();
-            var subscribedFeeds = subscriptionRepository.All();
+            var subscribedFeeds = subscriptionRepository.All().ToList();
 
             foreach (FeedEntity feed in feeds)
             {
+                var a = subscribedFeeds.Any(x => x.feedId == feed.Id && x.IsActive == true);
+
                 yield return new SubscriptionFeed() {
 
                     Id = feed.Id,
+                    description = feed.description,
                     IsActive = feed.IsActive,
                     source = feed.source,
                     title = feed.title,
@@ -67,30 +71,34 @@ namespace BusinessDomain
         {
             subscriptionRepository = new SubscriptionRepository(new FeedContext());
 
-            var result = subscriptionRepository.FindBy(x => x.feedId == subscription.feedId && x.userId == subscription.userId);
+            var result = subscriptionRepository.FindBy(x => x.feedId == subscription.feedId && x.userId == subscription.userId).FirstOrDefault();
 
-            //TODO: Move this code to an extension method
             if (result != null)
             {
-                if (result.Count > 0)
-                {
-                    subscription.IsActive = false;
-                    subscriptionRepository.Update(subscription);
-
-                }
-                else
-                {
-                    subscriptionRepository.Add(subscription);
-                }
-
+                subscriptionRepository.Erase(result);
             }
             else
             {
                 subscriptionRepository.Add(subscription);
             }
 
+            SyncroniceFeeds();
+
         }
 
+        private bool hasSubscriptions()
+        {
+            var userId = 1;  //harcoded userId for demo purposes
+            subscriptionRepository = new SubscriptionRepository(new FeedContext());
+            //Find subscriptions
+            if (subscriptionRepository.FindBy(x => x.userId == userId).ToList().Count > 0)
+            {
+               return true;
+            }
+
+            return false;
+
+        }
         public FeedContainerVM PopulateFeedContainer(FeedContainerInputModel searchModel = null)
         {
             var userId = 1;  //harcoded userId for demo purposes
@@ -101,16 +109,50 @@ namespace BusinessDomain
             subscriptionRepository = new SubscriptionRepository(new FeedContext());
             temporalFeedRepository = new TemporalFeedRepository(new FeedContext());
 
-            feedContainerVM.feeds = ConvertToSubscription();
+            feedContainerVM.feeds = ConvertToSubscription().Where(x=>x.isSubscribed == true);
 
-            List<FeedItemEntity> downloadFeeds = new List<FeedItemEntity>();
+            feedContainerVM.hasSubscriptions = hasSubscriptions();
 
-
+            List <FeedItemEntity> downloadFeeds = new List<FeedItemEntity>();
             //TODO: Search parameter
 
             if (searchModel == null)
             {
-                return SyncroniceFeeds();
+                
+
+                var syncedFeeds = temporalFeedRepository.FindBy(x => x.userId == userId).ToList();
+
+                var lastSyncedItem = syncedFeeds.FirstOrDefault();
+
+                TimeSpan elapsedTime;
+
+                if (lastSyncedItem != null)
+                {
+                    elapsedTime = DateTime.Now - lastSyncedItem.lastSynced;
+                }
+
+                //Syncronize every 8 hours
+                if (elapsedTime.Hours >= 8 || lastSyncedItem == null)
+                {
+                    return SyncroniceFeeds();
+                }
+                else
+                {
+                    feedContainerVM.feedItems = 
+                     syncedFeeds.Select(x => new FeedItemEntity
+                    {
+                        Id = x.Id,
+                        description = x.description != null ? x.description : "",
+                        IsActive = x.IsActive,
+                        link = x.link != null ? x.link : "",
+                        author = x.author != null ? x.author : "",
+                        imageUrl = x.imageUrl != null ? x.imageUrl : "",
+                        pubDate = x.pubDate != null ? x.pubDate : "",
+                        title = x.title != null ? x.title : ""
+                    }).ToList();
+
+                    return feedContainerVM;
+                }  
             }
             else
             {
@@ -120,7 +162,7 @@ namespace BusinessDomain
 
                 if (searchModel.selectedFeedId > 0)
                 {
-                    filteredFeeds = syncedFeeds.Where(x => x.feedId == searchModel.selectedFeedId && (x.title.Contains(searchModel.searchKey != null ? searchModel.searchKey : string.Empty) || x.description.Contains(searchModel.searchKey != null ? searchModel.searchKey : string.Empty))).Select(x => new FeedItemEntity
+                    filteredFeeds = syncedFeeds.Where(x => x.feedId == searchModel.selectedFeedId && (x.title.ToLower().Contains(searchModel.searchKey != null ? searchModel.searchKey.ToLower() : string.Empty) || x.description.ToLower().Contains(searchModel.searchKey != null ? searchModel.searchKey.ToLower() : string.Empty))).Select(x => new FeedItemEntity
                     {
                         Id = x.Id,
                         description = x.description != null ? x.description : "",
@@ -134,7 +176,7 @@ namespace BusinessDomain
                 }
                 else
                 {
-                    filteredFeeds = syncedFeeds.Where(x => x.title.Contains(searchModel.searchKey != null ? searchModel.searchKey : string.Empty) || x.description.Contains(searchModel.searchKey != null ? searchModel.searchKey : string.Empty)).Select(x => new FeedItemEntity
+                    filteredFeeds = syncedFeeds.Where(x => x.title.ToLower().Contains(searchModel.searchKey != null ? searchModel.searchKey.ToLower() : string.Empty) || x.description.ToLower().Contains(searchModel.searchKey != null ? searchModel.searchKey.ToLower() : string.Empty)).Select(x => new FeedItemEntity
                     {
                         Id = x.Id,
                         description = x.description != null ? x.description : "",
@@ -164,7 +206,9 @@ namespace BusinessDomain
             feedRepository = new FeedRepository(new FeedContext());
             subscriptionRepository = new SubscriptionRepository(new FeedContext());
 
-            feedContainerVM.feeds = ConvertToSubscription();
+            feedContainerVM.feeds = ConvertToSubscription().Where(x => x.isSubscribed == true); 
+
+            feedContainerVM.hasSubscriptions = hasSubscriptions();
 
             List<FeedItemEntity> downloadFeeds = new List<FeedItemEntity>();
 
@@ -217,6 +261,7 @@ namespace BusinessDomain
             //Save feed as a user favorite feed
             savedFeedRepository.Add(savedFeed);
         }
+
         private IList<FeedItemEntity> WriteFeedsToTemporalDatabase(IEnumerable<FeedItemEntity> feeds, int feedId)
         {
             var userId = 1;  //harcoded userId for demo purposes
@@ -233,7 +278,8 @@ namespace BusinessDomain
                     imageUrl = feed.imageUrl != null ? feed.imageUrl : "",
                     pubDate = feed.pubDate != null ? feed.pubDate : "",
                     title = feed.title != null ? feed.title : "",
-                    userId = userId
+                    userId = userId,
+                    lastSynced = DateTime.Now
                 });
             }
 
@@ -294,6 +340,35 @@ namespace BusinessDomain
 
         }
 
+        #region SavedFeeds
+        public SavedFeedsVM DisplaySavedFeeds(int userId)
+        {
+            savedFeedRepository = new SavedFeedRepository(new FeedContext());
 
+            SavedFeedsVM savedFeedsVM = new SavedFeedsVM()
+            {
+                savedFeedItems = savedFeedRepository.FindBy(x => x.userId == userId).ToList()
+            };
+          
+            return savedFeedsVM;
+        }
+
+        public SavedFeedsVM DeleteSavedFeed(int userId,int Id)
+        {
+            savedFeedRepository = new SavedFeedRepository(new FeedContext());
+
+            var deletedEntity = savedFeedRepository.FindBy(x => x.userId == userId && x.Id == Id).FirstOrDefault();
+
+            savedFeedRepository.Erase(deletedEntity);
+
+            SavedFeedsVM savedFeedsVM = new SavedFeedsVM()
+            {
+                savedFeedItems = savedFeedRepository.FindBy(x => x.userId == userId).ToList()
+            };
+
+            return savedFeedsVM;
+        }
+        
+        #endregion 
     }
 }

@@ -15,5 +15,6 @@ namespace DomainEntities
         public string category { get; set; }
         public int feedId { get; set; }
         public string imageUrl { get; set; }
+        public DateTime lastSynced { get; set; }
     }
 }

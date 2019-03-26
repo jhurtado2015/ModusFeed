@@ -12,11 +12,13 @@
         <div class="container">
             <div class="row" >
                 <span class="col-lg-2 ">
-                    @Html.ActionLink("Feed Bucket", "Index", "Home", new { area = "ver" }, new { @class = "navbar-brand" })
+                    @Html.ActionLink("Feed Bucket", "InitializeFeedContainer", "Home", new { area = "ver" }, new { @class = "navbar-brand" })
                 </span>
                 <span class="col-lg-4 col-lg-offset-4 align-text-bottom">
-                    @Html.ActionLink("Feeds", "InitializeFeedContainer", "Home", new { @class = "navbar-brand-link" })
-                    @Html.ActionLink("Subscriptions", "Subscriptions", "Home", new { @class = "navbar-brand-link" })
+                    <a href="/Home/InitializeFeedContainer" class="navbar-brand-link">Feeds</a>
+                    <a href="/Home/Subscriptions" class="navbar-brand-link">Subscriptions</a>
+                    <a href="/SavedFeeds/DisplaySavedFeeds" class="navbar-brand-link">FavoriteFeeds</a>
+               
                 </span>
 
             </div>

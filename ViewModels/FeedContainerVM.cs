@@ -13,9 +13,10 @@ namespace ViewModels
     }
     public class FeedContainerVM : FeedContainerInputModel
     {
-
+        public bool hasSubscriptions { get; set; }
         public IEnumerable<FeedItemEntity> feedItems { get; set; }
 
         public IEnumerable<SubscriptionFeed> feeds { get; set; }
+        
     }
 }
