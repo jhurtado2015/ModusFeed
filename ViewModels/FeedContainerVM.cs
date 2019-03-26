@@ -5,10 +5,14 @@ using System.Text;
 
 namespace ViewModels
 {
-    public class FeedContainerVM
+    public class FeedContainerInputModel: FeedItemEntity
     {
-
         public int selectedFeedId { get; set; }
+
+        public string searchKey { get; set; }
+    }
+    public class FeedContainerVM : FeedContainerInputModel
+    {
 
         public IEnumerable<FeedItemEntity> feedItems { get; set; }
 

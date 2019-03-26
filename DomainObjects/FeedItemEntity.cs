@@ -14,6 +14,7 @@ namespace DomainEntities
         public string description { get; set; }
         public string category { get; set; }
         public int feedId { get; set; }
+        public string imageUrl { get; set; }
 
         [ForeignKey("feedId")]
         public FeedEntity Feed { get; set; }

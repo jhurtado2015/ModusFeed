@@ -1,9 +1,9 @@
 ﻿
 @model ViewModels.SubscriptionsVM
 
-@using (Html.BeginForm(FormMethod.Post))
+@using (Html.BeginForm("Home", "Upload", FormMethod.Post))
 {
-    
+
 <div class="row">
 
     @if (Model != null)

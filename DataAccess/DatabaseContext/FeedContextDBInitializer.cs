@@ -21,9 +21,9 @@ namespace DataAccess.DatabaseContext
             //Seed Feeds
             IList<FeedEntity> defaultFeed = new List<FeedEntity>();
 
-            defaultFeed.Add(new FeedEntity() { source = "Fandango", title = "New Movies", url = "https://www.fandango.com/rss/newmovies.rss" });
-            defaultFeed.Add(new FeedEntity() { source = "GameSpot", title = "Game News", url = "https://www.gamespot.com/feeds/game-news/" });
-
+            defaultFeed.Add(new FeedEntity() { source = "NASA", description= "A RSS feed containing the latest education related news from NASA.", title = "Education News", url = "https://www.nasa.gov/rss/dyn/educationnews.rss" });
+            defaultFeed.Add(new FeedEntity() { source = "NASA", description = "Kepler News and Features RSS", title = "Kepler Mission", url = "https://www.nasa.gov/rss/dyn/mission_pages/kepler/news/kepler-newsandfeatures-RSS.rss" });
+            defaultFeed.Add(new FeedEntity() { source = "NASA", description = "A RSS news feed containing the latest NASA press releases on Earth-observing missions.", title = "Earth News", url = "https://www.nasa.gov/rss/dyn/earth.rss" });
             context.Feeds.AddRange(defaultFeed);
             //Seed Feed Items
 

@@ -16,7 +16,7 @@ namespace ModusFeedReader
             routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Home", action = "FeedContainer", id = UrlParameter.Optional }
+                defaults: new { controller = "Home", action = "InitializeFeedContainer", id = UrlParameter.Optional }
             );
         }
     }

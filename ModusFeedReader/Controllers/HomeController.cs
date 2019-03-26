@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using ViewModels;
 
 namespace ModusFeedReader.Controllers
 {
@@ -15,22 +16,27 @@ namespace ModusFeedReader.Controllers
 
         public ActionResult Index()
         {
-           
-
             return View();
         }
 
-        public ActionResult FeedContainer()
+        public ActionResult InitializeFeedContainer()
         {
             feed = new Feed();
-            return View(feed.PopulateFeedContainer());
+            return View("~/Views/Home/FeedContainer.cshtml", feed.PopulateFeedContainer());
         }
 
-        public ActionResult DownloadFeedNews(string url)
+        [HttpPost]
+        public ActionResult FilterFeeds(FeedContainerInputModel model)
         {
             feed = new Feed();
-            feed.GetFeeds("aa");
-            return View();
+            return View("~/Views/Home/FeedContainer.cshtml", feed.PopulateFeedContainer(model));
+        }
+
+        [HttpPost]
+        public ActionResult SaveFeed(FeedContainerInputModel model)
+        {
+            feed = new Feed();
+            return View("~/Views/Home/FeedContainer.cshtml", feed.PopulateFeedContainer(model));
         }
 
         [HttpGet]
