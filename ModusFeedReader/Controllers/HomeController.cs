@@ -39,10 +39,10 @@ namespace ModusFeedReader.Controllers
         }
 
         [HttpPost]
-        public ActionResult SaveFeed(FeedContainerInputModel model)
+        public ActionResult SaveFeed(int Id)
         {
             feed = new Feed();
-            return View("~/Views/Home/FeedContainer.cshtml", feed.PopulateFeedContainer(model));
+           // return View("~/Views/Home/FeedContainer.cshtml",feed.SaveFeed(Id,1));
         }
 
         [HttpGet]

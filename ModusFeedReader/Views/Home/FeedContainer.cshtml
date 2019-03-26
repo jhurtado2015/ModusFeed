@@ -53,14 +53,6 @@
     {
         foreach (var item in Model.feedItems)
         {
-
-            @Html.HiddenFor(x => x.title, @item.title);
-            //Html.HiddenFor(x => x.description, @item.description);
-            //Html.HiddenFor(x => x.link, @item.link);
-            //Html.HiddenFor(x => x.imageUrl, @item.imageUrl);
-            //Html.HiddenFor(x => x.pubDate, @item.pubDate);
-            //Html.HiddenFor(x => x.author, @item.author);
-
             <div class="row">
                 <div class="col-lg-8">
                     <div class="row"><a href="@item.link" target="_blank"><h4>@item.title</h4></a></div>
@@ -89,9 +81,7 @@
                                          }
                                     </div>
                                     <div class="row">
-                                        <button type="submit" class="btn btn-default">
-                                            <span class="glyphicon glyphicon-time"></span>
-                                        </button>
+                                        <button type="submit" class="btn btn-default" formaction="@Url.Action("SaveFeed", "Home", new { Id = item.Id })"><span class="glyphicon glyphicon-time"></span></button>
                                     </div>
                                 </div>
                             </div>

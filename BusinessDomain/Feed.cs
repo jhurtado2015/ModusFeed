@@ -19,6 +19,7 @@ namespace BusinessDomain
         IFeedRepository feedRepository;
         ISubscriptionRepository subscriptionRepository;
         ITemporalFeedRepository temporalFeedRepository;
+        ISavedFeedRepository savedFeedRepository;
         public Feed()
         {
         }
@@ -103,11 +104,11 @@ namespace BusinessDomain
             feedContainerVM.feeds = ConvertToSubscription();
 
             List<FeedItemEntity> downloadFeeds = new List<FeedItemEntity>();
-            
+
 
             //TODO: Search parameter
 
-           if(searchModel == null )
+            if (searchModel == null)
             {
                 return SyncroniceFeeds();
             }
@@ -117,7 +118,7 @@ namespace BusinessDomain
 
                 IEnumerable<FeedItemEntity> filteredFeeds;
 
-                if(searchModel.selectedFeedId > 0)
+                if (searchModel.selectedFeedId > 0)
                 {
                     filteredFeeds = syncedFeeds.Where(x => x.feedId == searchModel.selectedFeedId && (x.title.Contains(searchModel.searchKey != null ? searchModel.searchKey : string.Empty) || x.description.Contains(searchModel.searchKey != null ? searchModel.searchKey : string.Empty))).Select(x => new FeedItemEntity
                     {
@@ -143,12 +144,12 @@ namespace BusinessDomain
                         title = x.title != null ? x.title : ""
                     }).ToList();
                 }
-                
+
 
                 feedContainerVM.feedItems = filteredFeeds;
             }
 
-            
+
 
             return feedContainerVM;
 
@@ -187,6 +188,27 @@ namespace BusinessDomain
             return feedContainerVM;
         }
 
+        public void SaveFeed(int tempFeedId,int userId)
+        {
+            savedFeedRepository = new SavedFeedRepository(new FeedContext());
+            temporalFeedRepository = new TemporalFeedRepository(new FeedContext());
+
+            var savedFeed = temporalFeedRepository.FindBy(x => x.Id == tempFeedId).Select(feed => new SavedFeedEntity
+            {
+                feedId =feed.feedId,
+                description = feed.description != null ? feed.description : "",
+                IsActive = feed.IsActive,
+                link = feed.link != null ? feed.link : "",
+                author = feed.author != null ? feed.author : "",
+                imageUrl = feed.imageUrl != null ? feed.imageUrl : "",
+                pubDate = feed.pubDate != null ? feed.pubDate : "",
+                title = feed.title != null ? feed.title : "",
+                userId = userId
+
+            }).FirstOrDefault();
+
+            savedFeedRepository.Add(savedFeed);
+        }
         private IList<FeedItemEntity> WriteFeedsToTemporalDatabase(IEnumerable<FeedItemEntity> feeds, int feedId)
         {
             var userId = 1;  //harcoded userId for demo purposes
@@ -215,7 +237,8 @@ namespace BusinessDomain
                 imageUrl = x.imageUrl != null ? x.imageUrl : "",
                 pubDate = x.pubDate != null ? x.pubDate : "",
                 title = x.title != null ? x.title : "",
-                feedId = x.feedId
+                feedId = x.feedId,
+                Id = x.Id
             }).ToList();
         }
    
