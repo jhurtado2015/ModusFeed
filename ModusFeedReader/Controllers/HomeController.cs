@@ -41,8 +41,10 @@ namespace ModusFeedReader.Controllers
         [HttpPost]
         public ActionResult SaveFeed(int Id)
         {
+            var userId = 1; //Hardcoded for testing purposes
             feed = new Feed();
-           // return View("~/Views/Home/FeedContainer.cshtml",feed.SaveFeed(Id,1));
+            feed.SaveFeed(Id, userId);
+            return View("~/Views/Home/FeedContainer.cshtml", feed.PopulateFeedContainer(new FeedContainerInputModel { selectedFeedId = 0 }));
         }
 
         [HttpGet]

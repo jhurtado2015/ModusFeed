@@ -122,6 +122,7 @@ namespace BusinessDomain
                 {
                     filteredFeeds = syncedFeeds.Where(x => x.feedId == searchModel.selectedFeedId && (x.title.Contains(searchModel.searchKey != null ? searchModel.searchKey : string.Empty) || x.description.Contains(searchModel.searchKey != null ? searchModel.searchKey : string.Empty))).Select(x => new FeedItemEntity
                     {
+                        Id = x.Id,
                         description = x.description != null ? x.description : "",
                         IsActive = x.IsActive,
                         link = x.link != null ? x.link : "",
@@ -135,6 +136,7 @@ namespace BusinessDomain
                 {
                     filteredFeeds = syncedFeeds.Where(x => x.title.Contains(searchModel.searchKey != null ? searchModel.searchKey : string.Empty) || x.description.Contains(searchModel.searchKey != null ? searchModel.searchKey : string.Empty)).Select(x => new FeedItemEntity
                     {
+                        Id = x.Id,
                         description = x.description != null ? x.description : "",
                         IsActive = x.IsActive,
                         link = x.link != null ? x.link : "",
@@ -192,7 +194,8 @@ namespace BusinessDomain
         {
             savedFeedRepository = new SavedFeedRepository(new FeedContext());
             temporalFeedRepository = new TemporalFeedRepository(new FeedContext());
-
+    
+            //Get feed from temporal storage
             var savedFeed = temporalFeedRepository.FindBy(x => x.Id == tempFeedId).Select(feed => new SavedFeedEntity
             {
                 feedId =feed.feedId,
@@ -207,6 +210,11 @@ namespace BusinessDomain
 
             }).FirstOrDefault();
 
+            //Delete feed from temporal storage
+            var temporalFeedToRemove = temporalFeedRepository.FindBy(x => x.Id == tempFeedId).FirstOrDefault();
+            temporalFeedRepository.Erase(temporalFeedToRemove);
+
+            //Save feed as a user favorite feed
             savedFeedRepository.Add(savedFeed);
         }
         private IList<FeedItemEntity> WriteFeedsToTemporalDatabase(IEnumerable<FeedItemEntity> feeds, int feedId)
