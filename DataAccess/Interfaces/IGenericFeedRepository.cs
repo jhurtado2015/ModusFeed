@@ -13,5 +13,7 @@ namespace DataAccess.Interfaces
         IList<TEntity> FindBy(Expression<Func<TEntity, bool>> predicate);
         void Add(TEntity entity);
         void Update(TEntity entity);
+        void Erase(TEntity entity);
+
     }
 }

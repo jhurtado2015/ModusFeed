@@ -92,10 +92,13 @@ namespace BusinessDomain
 
         public FeedContainerVM PopulateFeedContainer(FeedContainerInputModel searchModel = null)
         {
+            var userId = 1;  //harcoded userId for demo purposes
+
             FeedContainerVM feedContainerVM = new FeedContainerVM();
 
             feedRepository = new FeedRepository(new FeedContext());
             subscriptionRepository = new SubscriptionRepository(new FeedContext());
+            temporalFeedRepository = new TemporalFeedRepository(new FeedContext());
 
             feedContainerVM.feeds = ConvertToSubscription();
 
@@ -104,59 +107,116 @@ namespace BusinessDomain
 
             //TODO: Search parameter
 
-          /* if(searchModel == null )
+           if(searchModel == null )
             {
-                foreach (FeedEntity subscribedFeed in feedContainerVM.feeds)
-                {
-                    downloadFeeds.AddRange(GetFeeds(subscribedFeed.url));
-                }   
+                return SyncroniceFeeds();
             }
             else
             {
-                foreach (FeedEntity subscribedFeed in feedContainerVM.feeds)
+                var syncedFeeds = temporalFeedRepository.FindBy(x => x.userId == userId).ToList();
+
+                IEnumerable<FeedItemEntity> filteredFeeds;
+
+                if(searchModel.selectedFeedId > 0)
                 {
-                    if (searchModel.selectedFeedId > 0)
+                    filteredFeeds = syncedFeeds.Where(x => x.feedId == searchModel.selectedFeedId && (x.title.Contains(searchModel.searchKey != null ? searchModel.searchKey : string.Empty) || x.description.Contains(searchModel.searchKey != null ? searchModel.searchKey : string.Empty))).Select(x => new FeedItemEntity
                     {
-                        if (subscribedFeed.Id == searchModel.selectedFeedId)
-                            downloadFeeds.AddRange(GetFeeds(subscribedFeed.url));
-                    }
-                    else
-                    {
-                        downloadFeeds.AddRange(GetFeeds(subscribedFeed.url));
-                    }
+                        description = x.description != null ? x.description : "",
+                        IsActive = x.IsActive,
+                        link = x.link != null ? x.link : "",
+                        author = x.author != null ? x.author : "",
+                        imageUrl = x.imageUrl != null ? x.imageUrl : "",
+                        pubDate = x.pubDate != null ? x.pubDate : "",
+                        title = x.title != null ? x.title : ""
+                    }).ToList();
                 }
+                else
+                {
+                    filteredFeeds = syncedFeeds.Where(x => x.title.Contains(searchModel.searchKey != null ? searchModel.searchKey : string.Empty) || x.description.Contains(searchModel.searchKey != null ? searchModel.searchKey : string.Empty)).Select(x => new FeedItemEntity
+                    {
+                        description = x.description != null ? x.description : "",
+                        IsActive = x.IsActive,
+                        link = x.link != null ? x.link : "",
+                        author = x.author != null ? x.author : "",
+                        imageUrl = x.imageUrl != null ? x.imageUrl : "",
+                        pubDate = x.pubDate != null ? x.pubDate : "",
+                        title = x.title != null ? x.title : ""
+                    }).ToList();
+                }
+                
 
+                feedContainerVM.feedItems = filteredFeeds;
+            }
 
-                if (!String.IsNullOrEmpty(searchModel.searchKey))
-                    downloadFeeds = downloadFeeds.Where(x => x.title.Contains(searchModel.searchKey) || x.description.Contains(searchModel.searchKey)).ToList();
-            }*/
-
-            feedContainerVM.feedItems = downloadFeeds;
+            
 
             return feedContainerVM;
 
         }
 
-        private IEnumerable<FeedItemEntity> WriteFeedsToTemporalDatabase(IEnumerable<FeedItemEntity> feeds)
+        public FeedContainerVM SyncroniceFeeds()
+        {
+            FeedContainerVM feedContainerVM = new FeedContainerVM();
+
+            feedRepository = new FeedRepository(new FeedContext());
+            subscriptionRepository = new SubscriptionRepository(new FeedContext());
+
+            feedContainerVM.feeds = ConvertToSubscription();
+
+            List<FeedItemEntity> downloadFeeds = new List<FeedItemEntity>();
+
+            temporalFeedRepository = new TemporalFeedRepository(new FeedContext());
+
+            var userId = 1;  //harcoded userId for demo purposes
+
+            var currentFeeds = temporalFeedRepository.FindBy(x => x.userId == userId).ToList();
+
+            //Wipeout table before syncronization
+            foreach (TemporalFeed tmpFeed in currentFeeds)
+            {
+                temporalFeedRepository.Erase(tmpFeed);
+            }
+
+            foreach (FeedEntity subscribedFeed in feedContainerVM.feeds)
+            {
+                downloadFeeds.AddRange(WriteFeedsToTemporalDatabase(GetFeeds(subscribedFeed.url), subscribedFeed.Id));
+            }
+
+            feedContainerVM.feedItems = downloadFeeds;
+
+            return feedContainerVM;
+        }
+
+        private IList<FeedItemEntity> WriteFeedsToTemporalDatabase(IEnumerable<FeedItemEntity> feeds, int feedId)
         {
             var userId = 1;  //harcoded userId for demo purposes
+
             //Store feeds in temporal database and assign an identifier
             foreach (FeedItemEntity feed in feeds)
             {
                 temporalFeedRepository.Add(new TemporalFeed {
-                         description = feed.description,
-                         IsActive = feed.IsActive,
-                         link = feed.link,
-                         author = feed.author,
-                         category = feed.category,
-                         imageUrl = feed.imageUrl,
-                         pubDate = feed.pubDate,
-                         title = feed.title,
-                         userId = userId
+                    feedId = feedId,
+                    description = feed.description != null ? feed.description : "",
+                    IsActive = feed.IsActive,
+                    link = feed.link != null ? feed.link : "",
+                    author = feed.author != null ? feed.author : "",
+                    imageUrl = feed.imageUrl != null ? feed.imageUrl : "",
+                    pubDate = feed.pubDate != null ? feed.pubDate : "",
+                    title = feed.title != null ? feed.title : "",
+                    userId = userId
                 });
             }
 
-            return temporalFeedRepository.FindBy(x => x.userId == userId).ToList();
+            return temporalFeedRepository.FindBy(x => x.userId == userId && x.feedId == feedId).Select(x => new FeedItemEntity {
+                description = x.description != null ? x.description : "",
+                IsActive = x.IsActive,
+                link = x.link != null ? x.link : "",
+                author = x.author != null ? x.author : "",
+                imageUrl = x.imageUrl != null ? x.imageUrl : "",
+                pubDate = x.pubDate != null ? x.pubDate : "",
+                title = x.title != null ? x.title : "",
+                feedId = x.feedId
+            }).ToList();
         }
    
         private  IEnumerable<FeedItemEntity> GetFeeds(string url)

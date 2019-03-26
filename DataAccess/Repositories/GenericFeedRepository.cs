@@ -37,6 +37,13 @@ namespace DataAccess.Repositories
             _dbContext.SaveChanges();
         }
 
+        public void Erase(TEntity entity)
+        {
+            _dbSet.Attach(entity);
+            _dbSet.Remove(entity);
+            _dbContext.SaveChanges();
+        }
+
         public IList<TEntity> FindBy(Expression<Func<TEntity, bool>> predicate)
         {
             IList<TEntity> results = _dbSet.AsNoTracking().Where(predicate).ToList();

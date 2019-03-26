@@ -24,6 +24,12 @@ namespace ModusFeedReader.Controllers
             feed = new Feed();
             return View("~/Views/Home/FeedContainer.cshtml", feed.PopulateFeedContainer());
         }
+        public ActionResult SyncroniceFeeds()
+        {
+            feed = new Feed();
+            return View("~/Views/Home/FeedContainer.cshtml", feed.SyncroniceFeeds());
+        }
+
 
         [HttpPost]
         public ActionResult FilterFeeds(FeedContainerInputModel model)

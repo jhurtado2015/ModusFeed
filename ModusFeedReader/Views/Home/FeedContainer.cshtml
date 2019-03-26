@@ -23,8 +23,15 @@
                     @Html.TextBoxFor(x => x.searchKey, new { @class = "form-control" })
 
                 </div>
-                <div class="col-lg-3 feeds-selector">
-                    <button class="form-control" type="submit">Filter</button>
+                <div class="col-lg-1 feeds-selector">
+                    <button type="submit" class="btn btn-default">
+                        <span class="glyphicon glyphicon-search"></span>
+                    </button>
+                </div>
+                <div class="col-lg-1 feeds-selector">
+                    <button type="submit" class="btn btn-default" formaction=@Url.Action("SyncroniceFeeds","Home")>
+                        <span class="glyphicon glyphicon-refresh"></span>
+                    </button>
                 </div>
             </div>
             <div class="row">
@@ -32,6 +39,7 @@
                     <div class="col-lg-3 feeds-selector">
                         <span>@Model.feedItems.Count() results back from</span>
                     </div>
+                    
                 </div>
                 <div class="row">
                     <hr />
